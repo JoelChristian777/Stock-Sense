@@ -4,13 +4,17 @@ import {useForm} from "react-hook-form";
 import InputField from "@/components/forms/InputField";
 import {Button} from "@/components/ui/button";
 import FooterLink from "@/components/forms/FooterLink";
+import {signInWithEmail} from "@/lib/actions/auth.actions";
+import {toast} from "sonner";
+import {useRouter} from "next/navigation";
 
 const SignIn = () => {
+    const router = useRouter();
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
-    } = useForm<SignUpFormData>({
+    } = useForm<SignInFormData>({
         defaultValues: {
             email: '',
             password: '',
@@ -18,12 +22,15 @@ const SignIn = () => {
         mode: 'onBlur'
     },);
 
-    const onSubmit= async (data: SignUpFormData) => {
+    const onSubmit = async (data: SignInFormData) => {
         try {
-            console.log(data);
-        }
-        catch(e) {
+            const result = await signInWithEmail(data);
+            if(result.success) router.push('/');
+        } catch (e) {
             console.error(e);
+            toast.error('Sign In failed', {
+                description: e instanceof Error ? e.message : 'Failed to SignIn'
+            })
         }
     }
 
@@ -38,7 +45,7 @@ const SignIn = () => {
                     placeholder="johnwick@gmail.com"
                     register={register}
                     error={errors.email}
-                    validation={{ required: 'Email is required', pattern: /^[a-zA-Z0-9_-]+$/, message: 'Email is required' }}
+                    validation={{ required: 'Email is required', pattern: /^\w+@\w+\.\w+$/, message: 'Email is required' }}
                 />
 
                 <InputField
